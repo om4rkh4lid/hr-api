@@ -3,13 +3,16 @@ import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
 import serverConfig from './config/schemas/server.config';
 import { ServerConfig } from './config/ServerConfig';
+import { PrismaModule } from 'nestjs-prisma';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
       envFilePath: ['config/server.env'],
       load: [serverConfig],
+    }),
+    PrismaModule.forRoot({
+      isGlobal: true,
     }),
   ],
   controllers: [AppController],
