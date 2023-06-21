@@ -1,12 +1,7 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ServerConfig } from './config/ServerConfig';
-import {
-  ClassSerializerInterceptor,
-  INestApplication,
-  Logger,
-  ValidationPipe,
-} from '@nestjs/common';
+import { INestApplication, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 const setupDocumentation = (app: INestApplication) => {
@@ -23,13 +18,6 @@ const setupDocumentation = (app: INestApplication) => {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ServerConfig);
-  const reflector = app.get(Reflector);
-
-  app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, stopAtFirstError: true }),
-  );
-
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
 
   setupDocumentation(app);
 
