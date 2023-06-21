@@ -14,8 +14,8 @@ export class CreateUserDto {
   @IsNotEmpty({
     message: (args) => {
       return args.value === null || args.value === undefined
-        ? 'Email is required'
-        : 'Email should not be empty';
+        ? 'email is required'
+        : 'email should not be empty';
     },
   })
   email: string;
@@ -30,14 +30,14 @@ export class CreateUserDto {
       minSymbols: 1,
     },
     {
-      message: `Password must be at least 8 characters long and must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 symbol`,
+      message: `password must be at least 8 characters long and must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 symbol`,
     },
   )
   @IsNotEmpty({
     message: (args) => {
       return args.value === null || args.value === undefined
-        ? 'Password is required'
-        : 'Password should not be empty';
+        ? 'password is required'
+        : 'password should not be empty';
     },
   })
   password: string;

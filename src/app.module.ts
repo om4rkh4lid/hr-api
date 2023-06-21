@@ -4,27 +4,32 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { ConfigModule } from '@nestjs/config';
-import serverConfig from './config/schemas/server.config';
-import { ServerConfig } from './config/ServerConfig';
 import { PrismaModule } from 'nestjs-prisma';
 import { UsersModule } from './users/users.module';
-import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { AuthModule } from './auth/auth.module';
+import { ExceptionsModule } from './exceptions/exception.module';
+import { PrismaExceptionFilter } from './exceptions/prisma-exceptions.filter';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import serverConfig from './config/server.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: ['config/server.env'],
       load: [serverConfig],
+      isGlobal: true,
     }),
     PrismaModule.forRoot({
       isGlobal: true,
     }),
     UsersModule,
+    AuthModule,
+    ExceptionsModule,
   ],
   controllers: [AppController],
   providers: [
-    ServerConfig,
+    ConfigService,
     {
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
@@ -37,6 +42,10 @@ import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
           stopAtFirstError: true,
         });
       },
+    },
+    {
+      provide: APP_FILTER,
+      useClass: PrismaExceptionFilter,
     },
   ],
 })

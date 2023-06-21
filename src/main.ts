@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ServerConfig } from './config/ServerConfig';
 import { INestApplication, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 
 const setupDocumentation = (app: INestApplication) => {
   const documentConfig = new DocumentBuilder()
@@ -17,13 +17,15 @@ const setupDocumentation = (app: INestApplication) => {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const config = app.get(ServerConfig);
+  const config = app.get(ConfigService);
 
   setupDocumentation(app);
 
-  await app.listen(config.port, () => {
+  const host = config.get<string>('server.host');
+  const port = config.get<number>('server.port');
+  await app.listen(port, () => {
     const logger = new Logger('Server');
-    logger.log(`Server running on http://${config.host}:${config.port}...`);
+    logger.log(`Server running on http://${host}:${port}...`);
   });
 }
 
