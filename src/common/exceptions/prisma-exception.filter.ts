@@ -15,12 +15,11 @@ export class PrismaExceptionFilter extends BaseExceptionFilter {
     switch (exception.code) {
       case 'P2025':
         const resource = exception.message.split(' ')[1].toLowerCase();
-        const response = {
+        res.status(HttpStatus.NOT_FOUND).json({
           statusCode: HttpStatus.NOT_FOUND,
           message: `The requested ${resource} doesn't exist`,
           error: 'Not Found',
-        };
-        res.status(HttpStatus.NOT_FOUND).json(response);
+        });
         break;
       case 'P2002':
         res.status(HttpStatus.CONFLICT).json({

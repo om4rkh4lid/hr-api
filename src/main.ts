@@ -17,10 +17,11 @@ const setupDocumentation = (app: INestApplication) => {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const config = app.get(ConfigService);
+  app.setGlobalPrefix('api');
 
   setupDocumentation(app);
 
+  const config = app.get(ConfigService);
   const host = config.get<string>('server.host');
   const port = config.get<number>('server.port');
   await app.listen(port, () => {

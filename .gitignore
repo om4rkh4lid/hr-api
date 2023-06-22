@@ -36,4 +36,5 @@ lerna-debug.log*
 
 # Environment Variables
 config/server.env
+config/jwt.env
 prisma/.env

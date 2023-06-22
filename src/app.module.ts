@@ -1,6 +1,8 @@
 import {
   ClassSerializerInterceptor,
+  MiddlewareConsumer,
   Module,
+  NestModule,
   ValidationPipe,
 } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -8,16 +10,16 @@ import { PrismaModule } from 'nestjs-prisma';
 import { UsersModule } from './users/users.module';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
-import { ExceptionsModule } from './exceptions/exception.module';
-import { PrismaExceptionFilter } from './exceptions/prisma-exceptions.filter';
+import { PrismaExceptionFilter } from './common/exceptions/prisma-exception.filter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import serverConfig from './config/server.config';
+import { AuthMiddleware } from './common/middleware/auth.middleware';
+import { jwtConfig, serverConfig } from './common/config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['config/server.env'],
-      load: [serverConfig],
+      envFilePath: ['config/server.env', 'config/jwt.env'],
+      load: [serverConfig, jwtConfig],
       isGlobal: true,
     }),
     PrismaModule.forRoot({
@@ -25,7 +27,6 @@ import serverConfig from './config/server.config';
     }),
     UsersModule,
     AuthModule,
-    ExceptionsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -49,4 +50,11 @@ import serverConfig from './config/server.config';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuthMiddleware)
+      .exclude('health', 'auth/login')
+      .forRoutes('*');
+  }
+}
