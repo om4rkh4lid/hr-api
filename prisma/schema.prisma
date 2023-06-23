@@ -10,9 +10,57 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model AttendanceLog {
+  id    Int       @id @default(autoincrement())
+  month Month
+  year  Int
+  day   Int
+  start DateTime
+  end   DateTime?
+}
+
+enum Month {
+  January
+  February
+  March
+  April
+  May
+  June
+  July
+  August
+  September
+  October
+  November
+  December
+}
+
+enum Weekday {
+  Saturday
+  Sunday
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+}
+
+model Employee {
+  id                 Int        @id @default(autoincrement())
+  firstName          String
+  middleName         String?
+  lastName           String
+  directSuperior     Employee?  @relation("EmployeeHierarchy", fields: [directSuperiorId], references: [id])
+  directSuperiorId   Int?
+  directSubordinates Employee[] @relation("EmployeeHierarchy")
+  user               User       @relation(fields: [userId], references: [id])
+  userId             Int        @unique
+  daysOff            Weekday[]  @default([Friday, Saturday])
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
   password  String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  Employee  Employee?
 }

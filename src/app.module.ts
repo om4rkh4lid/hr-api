@@ -14,6 +14,7 @@ import { PrismaExceptionFilter } from './common/exceptions/prisma-exception.filt
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthMiddleware } from './common/middleware/auth.middleware';
 import { jwtConfig, serverConfig } from './common/config';
+import { TokenExceptionFilter } from './common/exceptions/token-exception.filter';
 
 @Module({
   imports: [
@@ -47,6 +48,10 @@ import { jwtConfig, serverConfig } from './common/config';
     {
       provide: APP_FILTER,
       useClass: PrismaExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: TokenExceptionFilter,
     },
   ],
 })
