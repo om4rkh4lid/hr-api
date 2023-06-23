@@ -15,6 +15,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthMiddleware } from './common/middleware/auth.middleware';
 import { jwtConfig, serverConfig } from './common/config';
 import { TokenExceptionFilter } from './common/exceptions/token-exception.filter';
+import { EmployeesModule } from './employees/employees.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { TokenExceptionFilter } from './common/exceptions/token-exception.filter
     }),
     UsersModule,
     AuthModule,
+    EmployeesModule,
   ],
   controllers: [AppController],
   providers: [

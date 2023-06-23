@@ -4,6 +4,7 @@ import { PrismaService } from 'nestjs-prisma';
 import { User } from './entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { Employee } from 'src/employees/entitites/employee.entity';
 
 @Injectable()
 export class UsersService {
@@ -25,19 +26,24 @@ export class UsersService {
     return result.map((user) => new User(user));
   }
 
-  async findOne(id: number) {
-    return new User(
-      await this.prisma.user.findUniqueOrThrow({
-        where: { id },
-      }),
-    );
+  async findOne(criteria: Partial<User>): Promise<User> {
+    const result = await this.prisma.user.findUniqueOrThrow({
+      where: criteria,
+      include: {
+        employee: true,
+      },
+    });
+    if (result.employee) {
+      result.employee = new Employee(result.employee);
+    }
+    return new User(result);
   }
 
-  async findByEmail(email: string) {
-    return new User(
-      await this.prisma.user.findUniqueOrThrow({
-        where: { email },
-      }),
-    );
+  async findById(id: number): Promise<User> {
+    return await this.findOne({ id });
+  }
+
+  async findByEmail(email: string): Promise<User> {
+    return await this.findOne({ email });
   }
 }

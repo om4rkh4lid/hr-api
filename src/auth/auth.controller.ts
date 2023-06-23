@@ -3,8 +3,10 @@ import { AuthService } from './auth.service';
 import { LoginCredentialsDto } from './dto/login-credentials.dto';
 import { LoginExceptionFilter } from 'src/common/exceptions/login-exception.filter';
 import { AuthPayload } from './entity/auth-payload.entity';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
+@ApiTags('Auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

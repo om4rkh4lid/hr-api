@@ -5,6 +5,7 @@ import { AuthPayload } from './entity/auth-payload.entity';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
+import { AuthTokenPayload } from 'src/common/interfaces/auth-token-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -22,8 +23,13 @@ export class AuthService {
     );
     if (!passwordsMatch) throw new UnauthorizedException();
 
+    const tokenPayload: AuthTokenPayload = { userId: user.id };
+    if (user.employee) {
+      tokenPayload.employeeId = user.employee.id;
+    }
+    console.log(tokenPayload);
     const token = jwt.sign(
-      { id: user.id },
+      tokenPayload,
       this.config.get<string>('jwt.secret'),
       { expiresIn: this.config.get<string>('jwt.expiresIn') },
     );

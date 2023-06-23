@@ -9,8 +9,10 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('users')
+@ApiTags('Users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -26,6 +28,6 @@ export class UsersController {
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return await this.usersService.findOne(id);
+    return await this.usersService.findById(id);
   }
 }

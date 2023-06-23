@@ -1,8 +1,8 @@
 -- CreateEnum
-CREATE TYPE "Month" AS ENUM ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
+CREATE TYPE "Month" AS ENUM ('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC');
 
 -- CreateEnum
-CREATE TYPE "Weekday" AS ENUM ('Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday');
+CREATE TYPE "Weekday" AS ENUM ('SAT', 'SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI');
 
 -- CreateTable
 CREATE TABLE "AttendanceLog" (
@@ -24,7 +24,7 @@ CREATE TABLE "Employee" (
     "lastName" TEXT NOT NULL,
     "directSuperiorId" INTEGER,
     "userId" INTEGER NOT NULL,
-    "daysOff" "Weekday"[] DEFAULT ARRAY['Friday', 'Saturday']::"Weekday"[],
+    "daysOff" "Weekday"[] DEFAULT ARRAY['FRI', 'SAT']::"Weekday"[],
 
     CONSTRAINT "Employee_pkey" PRIMARY KEY ("id")
 );
