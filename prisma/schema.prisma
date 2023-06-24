@@ -11,27 +11,11 @@ datasource db {
 }
 
 model AttendanceLog {
-  id    Int       @id @default(autoincrement())
-  month Month
-  year  Int
-  day   Int
-  start DateTime
-  end   DateTime?
-}
-
-enum Month {
-  JAN
-  FEB
-  MAR
-  APR
-  MAY
-  JUN
-  JUL
-  AUG
-  SEP
-  OCT
-  NOV
-  DEC
+  id         Int       @id @default(autoincrement())
+  start      DateTime
+  end        DateTime?
+  employeeId Int
+  employee   Employee  @relation(fields: [employeeId], references: [id]) @ignore
 }
 
 enum Weekday {
@@ -45,16 +29,17 @@ enum Weekday {
 }
 
 model Employee {
-  id                 Int        @id @default(autoincrement())
+  id                 Int             @id @default(autoincrement())
   firstName          String
   middleName         String?
   lastName           String
-  directSuperior     Employee?  @relation("EmployeeHierarchy", fields: [directSuperiorId], references: [id])
+  directSuperior     Employee?       @relation("EmployeeHierarchy", fields: [directSuperiorId], references: [id])
   directSuperiorId   Int?
-  directSubordinates Employee[] @relation("EmployeeHierarchy")
-  user               User       @relation(fields: [userId], references: [id])
-  userId             Int        @unique
-  daysOff            Weekday[]  @default([FRI, SAT])
+  directSubordinates Employee[]      @relation("EmployeeHierarchy")
+  user               User            @relation(fields: [userId], references: [id])
+  userId             Int             @unique
+  daysOff            Weekday[]       @default([FRI, SAT])
+  AttendanceLog      AttendanceLog[]
 }
 
 model User {

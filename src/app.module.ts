@@ -12,10 +12,14 @@ import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { PrismaExceptionFilter } from './common/exceptions/prisma-exception.filter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthMiddleware } from './common/middleware/auth.middleware';
+import { JwtAuthMiddleware } from './common/middleware/jwt-auth.middleware';
 import { jwtConfig, serverConfig } from './common/config';
 import { TokenExceptionFilter } from './common/exceptions/token-exception.filter';
 import { EmployeesModule } from './employees/employees.module';
+import { AttendanceModule } from './attendance/attendance.module';
+import { AuthenticatedEmployeeMiddleware } from './common/middleware/authenticated-employee.middleware';
+import { EmployeesService } from './employees/employees.service';
+import { UsersService } from './users/users.service';
 
 @Module({
   imports: [
@@ -30,10 +34,13 @@ import { EmployeesModule } from './employees/employees.module';
     UsersModule,
     AuthModule,
     EmployeesModule,
+    AttendanceModule,
   ],
   controllers: [AppController],
   providers: [
     ConfigService,
+    EmployeesService,
+    UsersService,
     {
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
@@ -60,8 +67,9 @@ import { EmployeesModule } from './employees/employees.module';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(AuthMiddleware)
+      .apply(JwtAuthMiddleware)
       .exclude('health', 'auth/login')
       .forRoutes('*');
+    consumer.apply(AuthenticatedEmployeeMiddleware).forRoutes('attendance');
   }
 }
