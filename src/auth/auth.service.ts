@@ -27,7 +27,7 @@ export class AuthService {
     if (user.employee) {
       tokenPayload.employeeId = user.employee.id;
     }
-    console.log(tokenPayload);
+
     const token = jwt.sign(
       tokenPayload,
       this.config.get<string>('jwt.secret'),

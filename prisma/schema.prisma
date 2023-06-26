@@ -10,12 +10,67 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AttendanceEvent {
+  CLOCK_IN
+  CLOCK_OUT
+  MISSED
+  LATE_CLOCK_IN
+  OVERTIME_CLOCK_OUT
+  ABSENT
+}
+
+model CompanyAttendancePolicy {
+  id                   Int                  @id @default(autoincrement())
+  allowedLateMinutes   Int                  @default(10)
+  allowedLateHrs       Int                  @default(0)
+  lateHrsToAbsent      Int                  @default(2)
+  lateMinutesToAbsent  Int                  @default(0)
+  breakDurationMinutes Int                  @default(30)
+  onMissedClockOut     MissedClockOutPolicy @default(SET_MISSED)
+  Company              Company?
+  AttendancePolicy     AttendancePolicy[]
+}
+
 model AttendanceLog {
-  id         Int       @id @default(autoincrement())
-  start      DateTime
-  end        DateTime?
+  id         Int             @id @default(autoincrement())
+  day        Int
+  month      Int
+  year       Int
+  hr         Int
+  min        Int
+  timestamp  DateTime
+  eventType  AttendanceEvent
+  employee   Employee        @relation(fields: [employeeId], references: [id])
   employeeId Int
-  employee   Employee  @relation(fields: [employeeId], references: [id]) @ignore
+}
+
+model FlexibleHoursPolicy {
+  id                 Int              @id @default(autoincrement())
+  fullyFlexible      Boolean          @default(false)
+  startHr            Int?
+  startMins          Int?
+  coreWorkingHours   Int              @default(4)
+  AttendancePolicy   AttendancePolicy @relation(fields: [attendancePolicyId], references: [id])
+  attendancePolicyId Int              @unique
+}
+
+enum MissedClockOutPolicy {
+  SET_MISSED
+  SET_DEFAULT_END_SHIFT
+}
+
+model AttendancePolicy {
+  id                        Int                     @id @default(autoincrement())
+  startHr                   Int                     @default(9)
+  startMins                 Int                     @default(0)
+  workingHrs                Int                     @default(8)
+  flexibleHoursPolicy       FlexibleHoursPolicy?
+  daysOff                   Weekday[]               @default([FRI, SAT])
+  Employee                  Employee                @relation(fields: [employeeId], references: [id])
+  companyPolicy             CompanyAttendancePolicy @relation(fields: [companyAttendancePolicyId], references: [id])
+  flexibleHoursPolicyId     Int?                    @unique
+  employeeId                Int                     @unique
+  companyAttendancePolicyId Int
 }
 
 enum Weekday {
@@ -28,18 +83,30 @@ enum Weekday {
   FRI
 }
 
+model Company {
+  id                        Int                     @id @default(autoincrement())
+  name                      String
+  attendancePolicy          CompanyAttendancePolicy @relation(fields: [companyAttendancePolicyId], references: [id])
+  employees                 Employee[]
+  companyAttendancePolicyId Int                     @unique
+}
+
 model Employee {
-  id                 Int             @id @default(autoincrement())
+  id                 Int               @id @default(autoincrement())
   firstName          String
   middleName         String?
   lastName           String
-  directSuperior     Employee?       @relation("EmployeeHierarchy", fields: [directSuperiorId], references: [id])
+  directSuperior     Employee?         @relation("EmployeeHierarchy", fields: [directSuperiorId], references: [id])
+  directSubordinates Employee[]        @relation("EmployeeHierarchy")
+  user               User              @relation(fields: [userId], references: [id])
+  photoUrl           String?
+  attendancePolicy   AttendancePolicy?
+  attendanceLog      AttendanceLog[]
+  company            Company           @relation(fields: [companyId], references: [id])
+  userId             Int               @unique
   directSuperiorId   Int?
-  directSubordinates Employee[]      @relation("EmployeeHierarchy")
-  user               User            @relation(fields: [userId], references: [id])
-  userId             Int             @unique
-  daysOff            Weekday[]       @default([FRI, SAT])
-  AttendanceLog      AttendanceLog[]
+  attendancePolicyId Int?              @unique
+  companyId          Int
 }
 
 model User {

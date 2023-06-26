@@ -1,50 +1,33 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { ExtendedEmployee } from 'src/employees/entitites/extended-employee.entity';
+import { LatenessPolicy } from './policies/lateness.policy';
+import { getDateTime } from 'src/common/helpers/get-date-time';
 
 @Injectable()
 export class AttendanceService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly latenessPolicy: LatenessPolicy,
+  ) {}
 
   async clockIn(employee: ExtendedEmployee) {
     const now = Date.now();
     const date = new Date(now);
+    const dateTime = getDateTime(date);
+
+    const attendanceEvent = this.latenessPolicy.getVerdict(employee, date);
+
     return await this.prisma.attendanceLog.create({
       data: {
-        start: date.toISOString(),
-        employeeId: employee.id,
+        employee: { connect: { id: employee.id } },
+        ...dateTime,
+        eventType: attendanceEvent,
       },
     });
   }
 
   async clockOut(employee: ExtendedEmployee) {
-    const now = Date.now();
-    const date = new Date(now);
-    const logs = await this.prisma.attendanceLog.findMany({
-      where: {
-        employeeId: employee.id,
-        end: null,
-      },
-      orderBy: {
-        start: 'desc',
-      },
-    });
-
-    if (logs.length == 0) {
-      throw new BadRequestException('You have not clocked in today');
-    } else {
-      const idList = logs.map((log) => log.id);
-      const updated = await this.prisma.attendanceLog.updateMany({
-        where: {
-          id: {
-            in: idList,
-          },
-        },
-        data: {
-          end: date.toISOString(),
-        },
-      });
-      return updated;
-    }
+    return 'Clock Out';
   }
 }

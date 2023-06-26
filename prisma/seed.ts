@@ -1,8 +1,8 @@
 // prisma/seed.ts
 
-import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/users/entities/user.entity';
+import { PrismaClient } from '@prisma/client';
 
 // initialize Prisma Client
 const prisma = new PrismaClient();
@@ -26,7 +26,40 @@ async function main() {
     },
   });
 
-  console.log({ user_1, user_2 });
+  const user_2_actual = await prisma.user.findUnique({
+    where: { email: 'omar@employee.com' },
+  });
+
+  const employee_1 = await prisma.employee.create({
+    data: {
+      firstName: 'Omar',
+      lastName: 'Khalid',
+      userId: user_2_actual.id,
+    },
+  });
+
+  const employee_1_actual = await prisma.employee.findUnique({
+    where: { userId: user_2_actual.id },
+  });
+
+  const attendance_policy_1 = await prisma.attendancePolicy.create({
+    data: { employeeId: employee_1_actual.id },
+  });
+
+  console.log(
+    'Employee after update:',
+    await prisma.employee.findUnique({
+      where: { userId: user_2_actual.id },
+      include: { attendancePolicy: true },
+    }),
+  );
+
+  console.log({
+    user_1,
+    user_2_actual,
+    employee_1_actual,
+    attendance_policy_1,
+  });
 }
 
 // execute the main function
